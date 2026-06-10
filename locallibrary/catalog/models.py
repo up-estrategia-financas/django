@@ -40,12 +40,12 @@ class Book(models.Model):
         """"Return the url to acess a detail record for this book."""
         return reverse('book-detail', args=[str(self.id)])
 
-    class BookInstance(models.Model):
-        """Model representing a specific copy of a book 
-        (i.e. that can be borrowed from the library)."""
+class BookInstance(models.Model):
+    """Model representing a specific copy of a book 
+    (i.e. that can be borrowed from the library)."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4,
-                          help_text='Unique ID for this particular book across whole library')
+                      help_text='Unique ID for this particular book across whole library')
 
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True)
 
@@ -72,3 +72,6 @@ class Book(models.Model):
     def __str__(self):
         """String for representing the Model object"""
         return f'{self.id} ({self.book.title})'
+
+
+class 
