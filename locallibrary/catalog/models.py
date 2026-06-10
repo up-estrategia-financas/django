@@ -1,6 +1,12 @@
+from datetime import date
+
 from django.db import models
 from django.urls import reverse
 import uuid
+
+from django.db.models import UniqueConstraint
+from django.db.models.functions import Lower
+from django.conf import settings
 
 # Create your models here.
 
@@ -12,6 +18,41 @@ class Genre(models.Model):
     def __str__(self):
         """String for representing the Model object (in Admin site etc.)"""
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('genre-detail', args=[str(self.id)])
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('name'),
+                name='genre_name_case_insensitive_unique',
+                violation_error_message = "Genre already exists (case insensitive match)"
+            ),
+        ]
+
+class Language(models.Model):
+    """Modeling representing a Language (e.g English, French, Japanese, etc)"""
+
+    name = models.CharField(max_length=100,
+                            unique=True,
+                            help_text="Enter the book's natural laguange.")
+
+    def get_absolute_url(self):
+        return reverse('language-detail', args=[str(self.id)])
+
+    def __str__(self):
+        """String for representing the Model object (in Admin site etc)"""
+        return self.name
+
+    class Meta: 
+        constraints = [
+            UniqueConstraint(
+                Lower('name'),
+                name='language_name_case_insensitive_unique',
+                violation_error_message="Language already exists (case insentive match)"
+            )
+        ]
 
 class Book(models.Model):
     '''Model representing a boo (bu not specific copy of a book)'''
@@ -32,6 +73,18 @@ class Book(models.Model):
     # Genres class has already been defined so we can specify the object above.
     genre = models.ManyToManyField(Genre, help_text='Select a genre for this book.')
 
+    language = models.ForeignKey(
+        'Language', on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ['title', 'author']
+
+    def display_genre(self):
+        """Create a string for the Genre. This is required to display genre in Admin."""
+        return ', '.join(genre.name for genre in self.genre.all()[:3])
+
+    display_genre.short_description = 'Genre'
+
     def __str__(self):
         """String for representing the Model object"""
         return self.title
@@ -39,6 +92,7 @@ class Book(models.Model):
     def get_absolute_url(self):
         """"Return the url to acess a detail record for this book."""
         return reverse('book-detail', args=[str(self.id)])
+    
 
 class BookInstance(models.Model):
     """Model representing a specific copy of a book 
@@ -49,6 +103,9 @@ class BookInstance(models.Model):
     book = models.ForeignKey('Book', on_delete=models.SET_NULL, null=True)
     imprint = models.CharField(max_length=200)
     due_back = models.DateField(null=True, blank=True)
+    borrower = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     LOAN_STATUS = (
         ('m', 'Maintenance'),
@@ -67,6 +124,11 @@ class BookInstance(models.Model):
 
     class Meta:
         ordering = ['due_back']
+
+    @property
+    def is_overdue(self):
+        """Determines if the book is overdue based on due date and current date."""
+        return bool(self.due_back and date.today() > self.due_back)
 
     def __str__(self):
         """String for representing the Model object"""
@@ -89,4 +151,5 @@ class Author(models.Model):
     def get_absolute_url(self):
         """Return the url to acess a particular author instance."""
         return reverse('author-detail', args=[str(self.id)])
+
     
