@@ -1,11 +1,15 @@
 from django.shortcuts import render
 from django.views import generic
 from django.http import Http404
+from django.contrib.auth.decorators import login_required
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
 from catalog.models import Book, Author, BookInstance, Genre
 
+@login_required
 def index(request):
     """View function for home page of site."""
 
@@ -31,13 +35,13 @@ def index(request):
     return render(request, 'index.html', context=context)
 
 
-class BookListView(generic.ListView):
+class BookListView(LoginRequiredMixin, generic.ListView):
     queryset = Book.objects.order_by('-title') # Get 5 books containing the title war
     context_object_name = 'book_list'
     paginate_by = 10
 
 
-class BookDetailView(generic.DetailView):
+class BookDetailView(LoginRequiredMixin, generic.DetailView):
     model = Book
 
     def book_detail_view(request, primary_key):
