@@ -8,6 +8,8 @@ from django.db.models import UniqueConstraint
 from django.db.models.functions import Lower
 from django.conf import settings
 
+from django.contrib.auth.models import User
+
 # Create your models here.
 
 class Genre(models.Model):
@@ -105,6 +107,10 @@ class BookInstance(models.Model):
     due_back = models.DateField(null=True, blank=True)
     borrower = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    borrower = models.ForeignKey(
+         User, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     LOAN_STATUS = (
