@@ -37,9 +37,9 @@ def index(request):
 
 
 class BookListView(LoginRequiredMixin, generic.ListView):
-    queryset = Book.objects.order_by('-title') # Get 5 books containing the title war
+    queryset = Book.objects.order_by('-title')
     context_object_name = 'book_list'
-    paginate_by = 10
+    paginate_by = 2
 
 
 class BookDetailView(LoginRequiredMixin, generic.DetailView):
