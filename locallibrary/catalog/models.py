@@ -153,4 +153,3 @@ class Author(models.Model):
         """Return the url to acess a particular author instance."""
         return reverse('author-detail', args=[str(self.id)])
 
-    
