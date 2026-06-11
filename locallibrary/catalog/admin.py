@@ -19,6 +19,18 @@ admin.site.register(Author, AuthorAdmin)
 class BooksInstanceInline(admin.TabularInline):
     model = BookInstance
 
+    list_display = ('book', 'borrower', 'status', 'due_back', 'id')
+    list_filter = ('status', 'due_back')
+
+    fieldsets = (
+        (None, {
+            'fields': ('book','imprint', 'id')
+        }),
+        ('Availability', {
+            'fields': ('status', 'due_back','borrower')
+        }),
+    )
+
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'display_genre')
