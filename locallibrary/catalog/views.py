@@ -33,6 +33,7 @@ def index(request):
 class BookListView(generic.ListView):
     queryset = Book.objects.order_by('-title') # Get 5 books containing the title war
     context_object_name = 'book_list'
+    paginate_by = 10
 
 
 class BookDetailView(generic.DetailView):
