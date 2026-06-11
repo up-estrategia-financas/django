@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views import generic
+from django.http import Http404
 
 # Create your views here.
 
@@ -30,14 +31,17 @@ def index(request):
 
 
 class BookListView(generic.ListView):
+    queryset = Book.objects.order_by('-title') # Get 5 books containing the title war
+    context_object_name = 'book_list'
+
+
+class BookDetailView(generic.DetailView):
     model = Book
 
-    def get_queryset(self):
-        return Book.objects.filter(title__icontains='war')[:5] # Get 5 books containing the title war
-    
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get the context
-        context = super(BookListView, self).get_context_data(**kwargs)
-        # Create any data and add it to the context
-        context['some_data'] = 'This is just some data'
-        return context
+    def book_detail_view(request, primary_key):
+        try:
+            book = Book.objects.get(pk=primary_key)
+        except Book.DoesNotExist:
+            raise Http404('Book does not exist')
+
+        return render(request, 'catalog/book_detail.html', context={'book': book})
